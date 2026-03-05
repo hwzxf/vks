@@ -1,0 +1,62 @@
+apiVersion: cluster.x-k8s.io/v1beta2
+kind: Cluster
+metadata:
+  name: tkc01
+  namespace: demo
+spec:
+  clusterNetwork:
+    services:
+      cidrBlocks: ["10.96.0.0/12"]
+    pods:
+      cidrBlocks: ["10.244.0.0/16"]
+    serviceDomain: "cluster.local"
+  topology:
+    classRef:
+      name: builtin-generic-v3.6.0
+    version: v1.35.0---vmware.2-vkr.4
+    controlPlane:
+      replicas: 1
+    workers:
+      machineDeployments:
+        - class: node-pool
+          name: wl
+          replicas: 2
+          variables:
+            overrides:
+              - name: vmClass
+                value: best-effort-large
+              - name: volumes
+                value:
+                  - name: containerd
+                    capacity: 50Gi
+                    mountPath: /var/lib/containerd
+                    storageClass: nfs
+                  - name: kubelet
+                    capacity: 5Gi
+                    mountPath: /var/lib/kubelet
+                    storageClass: nfs
+    variables:
+      - name: vmClass
+        value: best-effort-medium
+      - name: storageClass
+        value: nfs
+      - name: kubeAPIServerFQDNs
+        value:
+          - tkc01.k8s.kld.cn
+      - name: vsphereOptions
+        value:
+          persistentVolumes:
+            defaultStorageClass: nfs
+      - name: kubernetes
+        value:
+          certificateRotation:
+            enabled: true
+            renewalDaysBeforeExpiry: 90
+          security:
+            podSecurityStandard:
+              enforce: "privileged"
+      - name: osConfiguration
+        value:
+          user:
+            sshAuthorizedKey: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJ6gJg6HLkoJHMLx6/XdOCrVi6IT1T6amv72tXM15yAN jason@Jason-Mac-mini.local"
+            user: tanzu
