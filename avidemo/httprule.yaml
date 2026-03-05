@@ -1,0 +1,10 @@
+apiVersion: ako.vmware.com/v1beta1
+kind: HTTPRule
+metadata:
+   name: avidemo-http-rule
+spec:
+  fqdn: avidemo.k8s.kld.cn
+  paths:
+  - target: /
+    loadBalancerPolicy:
+      algorithm: LB_ALGORITHM_ROUND_ROBIN

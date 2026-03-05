@@ -1,0 +1,19 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: avi-demo
+  annotations:
+    ako.vmware.com/enable-tls: "true"
+spec:
+  ingressClassName: "avi-lb"
+  rules:
+  - host: avidemo.k8s.kld.cn
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: avi-demo
+            port:
+              number: 80
