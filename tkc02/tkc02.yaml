@@ -42,7 +42,7 @@ spec:
         value: nfs
       - name: kubeAPIServerFQDNs
         value:
-          - tkc01.k8s.kld.cn
+          - tkc02.k8s.kld.cn
       - name: vsphereOptions
         value:
           persistentVolumes:
