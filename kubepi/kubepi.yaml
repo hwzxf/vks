@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: kubepi
+  name: kubepi
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kubepi
+  template:
+    metadata:
+      labels:
+        app: kubepi
+    spec:
+      containers:
+        - name: kubepi
+          image: harbor.vcloud.pub/docker.io/1panel/kubepi
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 80
+              name: http
+              protocol: TCP
+          resources: {}
+          volumeMounts:
+            - mountPath: /var/lib/kubepi
+              name: kubepi-vol
+      volumes:
+        - name: kubepi-vol
+          persistentVolumeClaim:
+            claimName: kubepi-pvc

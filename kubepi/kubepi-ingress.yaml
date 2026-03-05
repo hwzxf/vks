@@ -1,0 +1,26 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: kubepi-ing
+  annotations:
+    cert-manager.io/cluster-issuer: "ca-clusterissuer"
+    cert-manager.io/common-name: "kubepi.k8s.kld.cn"
+    cert-manager.io/duration: 2160h
+    cert-manager.io/renew-before: 360h
+    ingress.kubernetes.io/force-ssl-redirect: "true"
+spec:
+  tls:
+    - hosts:
+        - kubepi.k8s.kld.cn
+      secretName: kubepi-cert
+  rules:
+    - host: kubepi.k8s.kld.cn
+      http:
+        paths:
+          - pathType: Prefix
+            path: "/"
+            backend:
+              service:
+                name: kubepi-svc
+                port:
+                  number: 80
