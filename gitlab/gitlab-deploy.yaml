@@ -1,68 +1,128 @@
-
-apiVersion: apps/v1
-kind: Deployment
+apiVersion: v1
+kind: ReplicationController
 metadata:
   name: gitlab
   namespace: gitlab
-  labels:
-    app: gitlab
 spec:
   replicas: 1
   selector:
-    matchLabels:
-      app: gitlab
+    name: gitlab
   template:
     metadata:
+      name: gitlab
       labels:
-        app: gitlab
+        name: gitlab
     spec:
       containers:
-      - name: gitlab
-        image: harbor.vcloud.pub/docker.io/gitlab/gitlab-ce:latest
-        imagePullPolicy: IfNotPresent
-        resources:
-          limits:
-            cpu: "4"
-            memory: "8Gi"
-          requests:
-            cpu: "2"
-            memory: "4Gi"
-        env:
-        - name: EXTERNAL_URL
-          value: "https://gitlab.k8s.kld.cn"
-        - name: TZ
-          value: "Asia/Shanghai"
-        ports:
-        - containerPort: 80
-          name: http
-        - containerPort: 443
-          name: https
-        - containerPort: 22
-          name: ssh
-        volumeMounts:
-        - name: gitlab-data
-          mountPath: /var/opt/gitlab
-        - name: gitlab-config
-          mountPath: /etc/gitlab
-        - name: gitlab-logs
-          mountPath: /var/log/gitlab
-        livenessProbe:
-          httpGet:
-            path: /-/liveness
-            port: 80
-          initialDelaySeconds: 300
-          periodSeconds: 10
-        readinessProbe:
-          httpGet:
-            path: /-/readiness
-            port: 80
-          initialDelaySeconds: 300
-          periodSeconds: 10
+        - name: gitlab
+          image: harbor.vcloud.pub/docker.io/sameersbn/gitlab:16.1.0
+          env:
+            - name: TZ
+              value: Asia/Shanghai
+            - name: GITLAB_TIMEZONE
+              value: Beijing
+
+            - name: GITLAB_SECRETS_DB_KEY_BASE
+              value: long-and-random-alpha-numeric-string
+            - name: GITLAB_SECRETS_SECRET_KEY_BASE
+              value: long-and-random-alpha-numeric-string
+            - name: GITLAB_SECRETS_OTP_KEY_BASE
+              value: long-and-random-alpha-numeric-string
+
+            - name: GITLAB_ROOT_PASSWORD
+              value: 'VMware1!'
+            - name: GITLAB_ROOT_EMAIL
+              value: jason@vcloud.pub
+
+            - name: GITLAB_HOST
+              value: gitlab.k8s.kld.cn
+            - name: GITLAB_PORT
+              value: '80'
+            - name: GITLAB_SSH_PORT
+              value: '22'
+
+            - name: GITLAB_NOTIFY_ON_BROKEN_BUILDS
+              value: 'true'
+            - name: GITLAB_NOTIFY_PUSHER
+              value: 'false'
+
+            - name: GITLAB_BACKUP_SCHEDULE
+              value: daily
+            - name: GITLAB_BACKUP_TIME
+              value: 01:00
+
+            - name: DB_TYPE
+              value: postgres
+            - name: DB_HOST
+              value: postgresql
+            - name: DB_PORT
+              value: '5432'
+            - name: DB_USER
+              value: gitlab
+            - name: DB_PASS
+              value: passw0rd
+            - name: DB_NAME
+              value: gitlab_production
+
+            - name: REDIS_HOST
+              value: redis
+            - name: REDIS_PORT
+              value: '6379'
+
+            - name: SMTP_ENABLED
+              value: 'false'
+            - name: SMTP_DOMAIN
+              value: www.example.com
+            - name: SMTP_HOST
+              value: smtp.gmail.com
+            - name: SMTP_PORT
+              value: '587'
+            - name: SMTP_USER
+              value: mailer@example.com
+            - name: SMTP_PASS
+              value: password
+            - name: SMTP_STARTTLS
+              value: 'true'
+            - name: SMTP_AUTHENTICATION
+              value: login
+
+            - name: IMAP_ENABLED
+              value: 'false'
+            - name: IMAP_HOST
+              value: imap.gmail.com
+            - name: IMAP_PORT
+              value: '993'
+            - name: IMAP_USER
+              value: mailer@example.com
+            - name: IMAP_PASS
+              value: password
+            - name: IMAP_SSL
+              value: 'true'
+            - name: IMAP_STARTTLS
+              value: 'false'
+          ports:
+            - name: https
+              containerPort: 443
+            - name: http
+              containerPort: 80
+            - name: ssh
+              containerPort: 22
+          volumeMounts:
+            - mountPath: /home/git/data
+              name: data
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 180
+            timeoutSeconds: 5
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 5
+            timeoutSeconds: 1
       volumes:
-      - name: gitlab-data
-        persistentVolumeClaim:
-          claimName: gitlab-pvc
-      - name: gitlab-config
-        emptyDir: {}
-      - name: gitlab-logs
-        emptyDir: {}
+        - name: data
+          persistentVolumeClaim:
+            claimName: gitlab-pvc
