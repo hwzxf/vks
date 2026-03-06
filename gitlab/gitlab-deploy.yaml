@@ -1,0 +1,68 @@
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gitlab
+  namespace: gitlab
+  labels:
+    app: gitlab
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: gitlab
+  template:
+    metadata:
+      labels:
+        app: gitlab
+    spec:
+      containers:
+      - name: gitlab
+        image: harbor.vcloud.pub/docker.io/gitlab/gitlab-ce:latest
+        imagePullPolicy: IfNotPresent
+        resources:
+          limits:
+            cpu: "4"
+            memory: "8Gi"
+          requests:
+            cpu: "2"
+            memory: "4Gi"
+        env:
+        - name: EXTERNAL_URL
+          value: "https://gitlab.k8s.kld.cn"
+        - name: TZ
+          value: "Asia/Shanghai"
+        ports:
+        - containerPort: 80
+          name: http
+        - containerPort: 443
+          name: https
+        - containerPort: 22
+          name: ssh
+        volumeMounts:
+        - name: gitlab-data
+          mountPath: /var/opt/gitlab
+        - name: gitlab-config
+          mountPath: /etc/gitlab
+        - name: gitlab-logs
+          mountPath: /var/log/gitlab
+        livenessProbe:
+          httpGet:
+            path: /-/liveness
+            port: 80
+          initialDelaySeconds: 300
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /-/readiness
+            port: 80
+          initialDelaySeconds: 300
+          periodSeconds: 10
+      volumes:
+      - name: gitlab-data
+        persistentVolumeClaim:
+          claimName: gitlab-pvc
+      - name: gitlab-config
+        emptyDir: {}
+      - name: gitlab-logs
+        emptyDir: {}
