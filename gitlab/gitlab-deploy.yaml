@@ -35,25 +35,23 @@ spec:
         - containerPort: 22
         resources:
           requests:
-            cpu: "1000m"       # 1 CPU core
-            memory: "2Gi"       # 2GB RAM
+            cpu: "1000m"
+            memory: "2Gi"
           limits:
-            cpu: "2000m"        # 2 CPU cores
-            memory: "4Gi"       # 4GB RAM
+            cpu: "2000m"
+            memory: "4Gi"
         volumeMounts:
         - name: gitlab-data
           mountPath: /var/opt/gitlab
-        - name: gitlab-config
+          subPath: data
+        - name: gitlab-data
           mountPath: /etc/gitlab
-        - name: gitlab-logs
+          subPath: config
+        - name: gitlab-data
           mountPath: /var/log/gitlab
+          subPath: logs
       volumes:
       - name: gitlab-data
         persistentVolumeClaim:
           claimName: gitlab-pvc
-      - name: gitlab-config
-        persistentVolumeClaim:
-          claimName: gitlab-config-pvc
-      - name: gitlab-logs
-        persistentVolumeClaim:
-          claimName: gitlab-logs-pvc
+
