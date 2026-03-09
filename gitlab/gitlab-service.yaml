@@ -40,7 +40,6 @@ spec:
   ports:
     - name: redis
       port: 6379
-      targetPort: redis
   selector:
     app: gitlab-redis
 ---
@@ -55,6 +54,5 @@ spec:
   ports:
     - name: postgres
       port: 5432
-      targetPort: postgres
   selector:
     app: gitlab-postgresql
