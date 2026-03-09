@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
       - name: gitlab
-        image: harbor.vcloud.pub/docker.io/gitlab/gitlab-ce:latest
+        image: swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/postgres:latest
         env:
         - name: GITLAB_OMNIBUS_CONFIG
           value: |
