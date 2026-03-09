@@ -20,6 +20,9 @@ kind: Service
 metadata:
   name: gitlab-ssh-service
   namespace: gitlab
+  annotations:
+    ako.vmware.com/enable-shared-vip: "shared-vip-key-1"
+    ako.vmware.com/load-balancer-ip: 100.68.0.8
 spec:
   selector:
     app: gitlab
