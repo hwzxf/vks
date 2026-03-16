@@ -13,13 +13,13 @@ spec:
   topology:
     classRef:
       name: builtin-generic-v3.6.0
-    version: v1.35.0---vmware.2-vkr.4
+    version: v1.33.3---vmware.1-fips-vkr.1
     controlPlane:
       replicas: 1
     workers:
       machineDeployments:
         - class: node-pool
-          name: wl
+          name: linux
           replicas: 2
           variables:
             overrides:
@@ -34,6 +34,26 @@ spec:
                   - name: kubelet
                     capacity: 5Gi
                     mountPath: /var/lib/kubelet
+                    storageClass: nfs
+        - class: node-pool
+          name: win
+          replicas: 2
+          metadata:
+            annotations:
+              run.tanzu.vmware.com/resolve-os-image: os-name=windows
+          variables:
+            overrides:
+              - name: vmClass
+                value: best-effort-large
+              - name: volumes
+                value:
+                  - name: kubelet-dir
+                    mountPath: C:\var\lib\kubelet
+                    capacity: 5Gi
+                    storageClass: nfs
+                  - name: containerd-dir
+                    mountPath: C:\ProgramData\containerd
+                    capacity: 50Gi
                     storageClass: nfs
     variables:
       - name: vmClass
